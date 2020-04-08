@@ -41,6 +41,8 @@ if __name__ == '__main__':
     ok = tracker.init(gray, bbox)
     ok = tracker2.init(frame, bbox2)
 
+    trasholdControl = 40
+    
     while True:
         ok, frame = video.read()
         ok, frame2 = video.read()
@@ -52,8 +54,6 @@ if __name__ == '__main__':
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         blur = cv2.blur(gray, (3, 3))
 
-        
-        
         x, y, w, h = int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])
         x2, y2, w2, h2 = int(bbox2[0]), int(bbox2[1]), int(bbox2[2]), int(bbox2[3])
         
@@ -89,13 +89,13 @@ if __name__ == '__main__':
         
         color = (0, 5, 50)
         font = cv2.FONT_HERSHEY_SIMPLEX
-        image = cv2.putText(frame, 'TR-1', (x,y), font, 1, color, 2, cv2.LINE_AA) 
+        image = cv2.putText(frame, 'Right/Left', (x,y), font, 1, color, 2, cv2.LINE_AA) 
 
         p1_2 = (x2, y2)
         p2_2 = (x2 + w2, y2 + h2)
         xCenter2 = round(x2 + w2 / 2)
         yCenter2 = round(y2 + h2 / 2)
-        image = cv2.putText(frame, 'TR-2', (x2,y2), font, 1, color, 2, cv2.LINE_AA)
+        image = cv2.putText(frame, 'Up/Down', (x2,y2), font, 1, color, 2, cv2.LINE_AA)
 
         cv2.line(frame, p1, p2, (255, 0, 255), 4)
         cv2.circle(frame, (xCenter, yCenter), 5, (0, 255, 0), -2)
@@ -111,20 +111,38 @@ if __name__ == '__main__':
         
         xCenterBeg = round(xBeg + wBeg / 2)
         yCenterBeg = round(yBeg + hBeg / 2)
-        cv2.circle(frame, (xCenterBeg, yCenterBeg), 40, (0, 0, 255), 2)
+        cv2.circle(frame, (xCenterBeg, yCenterBeg), trasholdControl, (0, 0, 255), 2)
         cv2.circle(frame, (xCenterBeg, yCenterBeg), 6, (0, 0, 255), 3)
         cv2.line(frame, (xCenterBeg, yCenterBeg), (xCenter, yCenter), (255, 0, 255), 2)
-        distanceRange(xBeg, yBeg, xCenter, yCenter)
+        
 
         xCenter2Beg = round(x2Beg + w2Beg / 2)
         yCenter2Beg = round(y2Beg + h2Beg / 2)
-        cv2.circle(frame, (xCenter2Beg, yCenter2Beg), 40, (0, 0, 255), 2)
+        cv2.circle(frame, (xCenter2Beg, yCenter2Beg), trasholdControl, (0, 0, 255), 2)
         cv2.circle(frame, (xCenter2Beg, yCenter2Beg), 6, (0, 0, 255), 3)
         cv2.line(frame, (xCenter2Beg, yCenter2Beg), (xCenter2, yCenter2), (255, 0, 255), 2)
-        #print ("X-XTrace", (xCenter-xBeg)*(-1))
-        print ("yCenter:", yCenter)
-        print ("yBeg:", yBeg)
-        print ("Y-YTrace", (yCenter-yBeg)*(-1))
+        print( distanceRange(xCenter2Beg, yCenter2Beg,xCenter2, yCenter2))
+        leftRight = xCenterBeg-xCenter
+        upDown = yCenter2Beg-yCenter2
+        
+        if(leftRight < trasholdControl*(-1)):
+            print("indo p esquerda: ", leftRight)
+        if(leftRight > trasholdControl):
+            print("indo p direita: ", leftRight)
+        if(leftRight > trasholdControl*(-1) and leftRight < trasholdControl):
+            print("Paradin da silva: ", leftRight)
+
+        if(upDown < trasholdControl*(-1)):
+            print("indo p baixo: ", upDown)
+        if(upDown > trasholdControl):
+            print("indo p cima: ", upDown)
+        if(upDown > trasholdControl*(-1) and upDown < trasholdControl):
+            print("sem andar: ", upDown)
+        
+        
+        #print ("yCenter:", yCenter)
+        #print ("yBeg:", yBeg)
+        #print ("Y-YTrace", (yCenter-yBeg)*(-1))
         cv2.imshow("Frame", frame)
 
         k = cv2.waitKey(1)
