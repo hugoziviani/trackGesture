@@ -6,13 +6,26 @@ def distanceRange(x1,y1,x2,y2):
      distance = float(math.sqrt((x2 - x1)**2 + (y2 - y1)**2))
      return distance
 
-if __name__ == '__main__':
+def percentIntensity(defaultThreshControl, straightSize):
+    return float(straightSize/defaultThreshControl)
+
+def makeProcessTrackInterpreter():
     backSub = cv2.createBackgroundSubtractorKNN(history=1, detectShadows=False)
     backSub2 = cv2.createBackgroundSubtractorKNN(history=1, detectShadows=False)
     #backSub = cv2.createBackgroundSubtractorMOG2(history=1, varThreshold=150, detectShadows=False)
 
-    tracker = cv2.TrackerMIL_create()
-    tracker2 = cv2.TrackerMIL_create()
+    # tracker = cv2.TrackerBoosting_create()
+    # tracker = cv2.TrackerMIL_create()
+    # tracker = cv2.TrackerKCF_create()
+    # tracker = cv2.TrackerTLD_create()
+    # tracker = cv2.TrackerMedianFlow_create()
+    # tracker = cv2.TrackerGOTURN_create()
+    # tracker = cv2.TrackerMOSSE_create()
+    #tracker = cv2.TrackerCSRT_create()
+
+
+    tracker = cv2.cv2.TrackerMIL_create()
+    tracker2 = cv2.cv2.TrackerMIL_create()
     
     video = cv2.VideoCapture(0)
 
@@ -26,11 +39,10 @@ if __name__ == '__main__':
     color = (0, 255, 0)
     font = cv2.FONT_HERSHEY_SIMPLEX
     
-    vetFrames[57] = cv2.putText(vetFrames[57], 'Select your first control region:', (50,50), font, 1, color, 1, cv2.LINE_AA) 
-    
+    vetFrames[57] = cv2.putText(vetFrames[57], 'Select your first control region:', (50, 50), font, 1, color, 1, cv2.LINE_AA)
     bbox = cv2.selectROI(vetFrames[57], True)
     
-    vetFrames[58] = cv2.putText(vetFrames[58], 'Select your second control region:', (50,50), font, 1, color, 1, cv2.LINE_AA) 
+    vetFrames[58] = cv2.putText(vetFrames[58], 'Select your second control region:', (50, 50), font, 1, color, 1, cv2.LINE_AA)
     bbox2 = cv2.selectROI(vetFrames[58], True)
     
     bboxDefault = bbox
@@ -42,6 +54,7 @@ if __name__ == '__main__':
     ok = tracker2.init(frame, bbox2)
 
     trasholdControl = 40
+    defaultSizeRefference = 40 #recive a side of square_track
     
     while True:
         ok, frame = video.read()
@@ -97,14 +110,13 @@ if __name__ == '__main__':
         yCenter2 = round(y2 + h2 / 2)
         image = cv2.putText(frame, 'Up/Down', (x2,y2), font, 1, color, 2, cv2.LINE_AA)
 
-        cv2.line(frame, p1, p2, (255, 0, 255), 4)
+        #cv2.line(frame, p1, p2, (255, 0, 255), 4)
         cv2.circle(frame, (xCenter, yCenter), 5, (0, 255, 0), -2)
         cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
 
-        cv2.line(frame, p1_2, p2_2, (100, 250, 0), 4)
+        #cv2.line(frame, p1_2, p2_2, (100, 250, 0), 4)
         cv2.circle(frame, (xCenter2, yCenter2), 5, (0, 100, 200), -2)
         cv2.rectangle(frame, p1_2, p2_2, (255, 0, 0), 2, 1)
-
 
         xBeg, yBeg, wBeg, hBeg = int(bboxDefault[0]), int(bboxDefault[1]), int(bboxDefault[2]), int(bboxDefault[3])
         x2Beg, y2Beg, w2Beg, h2Beg = int(bboxDefault2[0]), int(bboxDefault2[1]), int(bboxDefault2[2]), int(bboxDefault2[3])
@@ -114,31 +126,38 @@ if __name__ == '__main__':
         cv2.circle(frame, (xCenterBeg, yCenterBeg), trasholdControl, (0, 0, 255), 2)
         cv2.circle(frame, (xCenterBeg, yCenterBeg), 6, (0, 0, 255), 3)
         cv2.line(frame, (xCenterBeg, yCenterBeg), (xCenter, yCenter), (255, 0, 255), 2)
-        
 
         xCenter2Beg = round(x2Beg + w2Beg / 2)
         yCenter2Beg = round(y2Beg + h2Beg / 2)
         cv2.circle(frame, (xCenter2Beg, yCenter2Beg), trasholdControl, (0, 0, 255), 2)
         cv2.circle(frame, (xCenter2Beg, yCenter2Beg), 6, (0, 0, 255), 3)
         cv2.line(frame, (xCenter2Beg, yCenter2Beg), (xCenter2, yCenter2), (255, 0, 255), 2)
-        print( distanceRange(xCenter2Beg, yCenter2Beg,xCenter2, yCenter2))
+
+        turningStraight = distanceRange(xCenterBeg, yCenterBeg, xCenter, yCenter)
+        intensityTurning = percentIntensity(defaultSizeRefference, turningStraight)
+        sizeStraight = distanceRange(xCenter2Beg, yCenter2Beg, xCenter2, yCenter2)
+        intensityUpDown = percentIntensity(defaultSizeRefference, sizeStraight)
+
         leftRight = xCenterBeg-xCenter
         upDown = yCenter2Beg-yCenter2
         
         if(leftRight < trasholdControl*(-1)):
             print("indo p esquerda: ", leftRight)
+            print("Left Percent: ", intensityTurning)
         if(leftRight > trasholdControl):
             print("indo p direita: ", leftRight)
+            print("Right Percent: ", intensityTurning)
         if(leftRight > trasholdControl*(-1) and leftRight < trasholdControl):
             print("Paradin da silva: ", leftRight)
 
         if(upDown < trasholdControl*(-1)):
             print("indo p baixo: ", upDown)
+            print("Down Percent: ", intensityUpDown)
         if(upDown > trasholdControl):
             print("indo p cima: ", upDown)
+            print("Upp Percent: ", intensityUpDown)
         if(upDown > trasholdControl*(-1) and upDown < trasholdControl):
             print("sem andar: ", upDown)
-        
         
         #print ("yCenter:", yCenter)
         #print ("yBeg:", yBeg)
@@ -148,4 +167,8 @@ if __name__ == '__main__':
         k = cv2.waitKey(1)
         if k == ord('q'):
             exit()
-cv2.destroyAllWindows()
+    cv2.destroyAllWindows()
+
+
+if __name__ == '__main__':
+    makeProcessTrackInterpreter()
