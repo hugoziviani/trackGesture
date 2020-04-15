@@ -1,0 +1,60 @@
+from VideoCaptureClass import *
+from TrackAndTransformFrames import TrackAndTransform
+import cv2
+import time
+
+#constants
+INITIAL_BUFFER_SIZE = 300        # quantity of in frames
+TRASHOLD_CONTROLS = 40           # measure in pixels
+SIZE_REFERENC_TO_INTENSITY = 40  # measure reference in pixels
+
+def fillBufferToInitProcess(cap, trackObject, numbersOfFrames):
+    for iterations in range(numbersOfFrames):
+        ok, frame = cap.read()
+        trackObject.fillBufferFrames(frame)
+
+def requestPreparationsOfObject(trackObject):
+    trackObject.requestRoi()
+    trackObject.requestRoi()
+    trackObject.requestTrackers()
+    trackObject.requestTrackers()
+    trackObject.startTrackers()
+    trackObject.requestBackGroundSubtractors()
+    trackObject.requestBackGroundSubtractors()
+
+def mainFunction(width=1280, height=720):
+
+    global cap #Verify the necessity TODO
+    cap = AsyncVideoCapture(0)
+
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+
+    cap.start()
+    time.sleep(0.5) #giving time to camera up cool.
+
+    trackTransformObj = TrackAndTransform(None, INITIAL_BUFFER_SIZE, TRASHOLD_CONTROLS, SIZE_REFERENC_TO_INTENSITY)
+    fillBufferToInitProcess(cap, trackTransformObj, INITIAL_BUFFER_SIZE)
+
+    requestPreparationsOfObject(trackTransformObj)
+
+    while True:
+        ok, frame = cap.read()
+        ok, frame2 = cap.read()
+
+        trackTransformObj.setFrame(frame)
+        trackTransformObj.setGrayFrame(frame2)
+
+        if ok:
+            f1 = trackTransformObj.updateTrackAndProcess()
+            cv2.imshow('Frame', f1)
+
+        if cv2.waitKey(1) == ord("q"):
+            break
+
+    cap.stop()
+    cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    mainFunction(width=1280, height=720)
+
