@@ -1,11 +1,12 @@
 import sys
 import cv2
-from queue import Queue
 import math
+from queue import Queue
+
 
 class TrackAndTransform:
     def __init__(self, frame=None, bufferFramesSize=500, trasholdControls=40, sizeRefferenceToIntensitys=40):
-        print('Building TrackAndTransform Class...')
+        #print('Building TrackAndTransform Class...')
         try:
             self.previousFrame = None
             self.frame = frame
@@ -21,7 +22,7 @@ class TrackAndTransform:
             self.intensityTurning = None
             self.intensityUpDown = None
         except:
-            print("Error ", sys.exc_info())
+            sys.exc_info()
 
     def setFrame(self, frame):
         self.frame = frame
@@ -60,12 +61,12 @@ class TrackAndTransform:
         tracker = cv2.TrackerMIL_create()
         if tracker:
             self.trackers.append(tracker)
-            print("Tracker ", len(self.trackers), "created at", tracker)
+            #print("Tracker ", len(self.trackers), "created at", tracker)
 
     def startTrackers(self):
         frameToStartTrack = self.frameBuffer.get()
         for tracker, roi in zip(self.trackers, self.ROIs):
-            print("Starting:", tracker)
+            #print("Starting:", tracker)
             tracker.init(frameToStartTrack, roi)
 
     def updatePreviousFrame(self, frame):
@@ -159,10 +160,10 @@ class TrackAndTransform:
         leftRight = xCenterBeg - xCenter
         upDown = yCenter2Beg - yCenter2
 
-        self.__afferDirections(leftRight, upDown)
+        #self.__afferDirections(leftRight, upDown)
 
-        self.updatePreviousFrame(self.frame)# to keep if need
-        return frame
+        #self.updatePreviousFrame(self.frame)# to keep if need
+        return frame, round(self.intensityTurning, 2), leftRight, round(self.intensityUpDown, 2), upDown
 
     def __distanceRange(self, x1, y1, x2, y2):
         distance = float(math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2))

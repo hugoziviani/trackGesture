@@ -1,12 +1,10 @@
 from VideoCaptureClass import *
 from TrackAndTransformFrames import TrackAndTransform
+from generalConfig import *
 import cv2
 import time
+import sys
 
-#constants
-INITIAL_BUFFER_SIZE = 300        # quantity of in frames
-TRASHOLD_CONTROLS = 40           # measure in pixels
-SIZE_REFERENC_TO_INTENSITY = 40  # measure reference in pixels
 
 def fillBufferToInitProcess(cap, trackObject, numbersOfFrames):
     for iterations in range(numbersOfFrames):
@@ -46,8 +44,11 @@ def mainFunction(width=1280, height=720):
         trackTransformObj.setGrayFrame(frame2)
 
         if ok:
-            f1 = trackTransformObj.updateTrackAndProcess()
+            f1, intensityTurning, leftRight, intensityUpDown, upDown = trackTransformObj.updateTrackAndProcess()
             cv2.imshow('Frame', f1)
+            # intensityTurning, leftRight, intensityUpDown, upDown
+            sys.stdout.write(str(intensityTurning) + DELIMITER_TAGS + str(leftRight) + DELIMITER_TAGS +
+                             str(intensityUpDown) + DELIMITER_TAGS + str(upDown) + '\n')
 
         if cv2.waitKey(1) == ord("q"):
             break

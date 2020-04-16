@@ -1,9 +1,9 @@
 from threading import Thread, Lock
 import cv2
 
+
 class AsyncVideoCapture:
     def __init__(self, src=0, width=1280, height=720):
-        print('Building VideoCaptureAsync Class to capture')
         self.src = src
         self.cap = cv2.VideoCapture(self.src)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
@@ -17,7 +17,6 @@ class AsyncVideoCapture:
 
     def start(self):
         if self.started:
-            print('Async capture started.')
             return None
         self.started = True
         self.thread = Thread(target=self.update, args=())
