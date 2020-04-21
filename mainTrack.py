@@ -47,7 +47,7 @@ def mainFunction(width=1280, height=720):
             f1, intensityTurning, leftRight, intensityUpDown, upDown = trackTransformObj.updateTrackAndProcess()
             cv2.imshow('Frame', f1)
             # intensityTurning, leftRight, intensityUpDown, upDown
-            sys.stdout.write(str(intensityTurning) + DELIMITER_TAGS + str(leftRight) + DELIMITER_TAGS +
+            print(str(intensityTurning) + DELIMITER_TAGS + str(leftRight) + DELIMITER_TAGS +
                              str(intensityUpDown) + DELIMITER_TAGS + str(upDown) + '\n')
 
         if cv2.waitKey(1) == ord("q"):
