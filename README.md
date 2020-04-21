@@ -8,3 +8,5 @@ It is composed by two Classes TrackAndTransformFrames.py	and VideoCaptureClass.p
 
 
 OBS: Is optional make a virtual environment to install the requirements.txt and after all run the project.
+
+link to video example: https://youtu.be/Iyi8i6xSaEU using RoboComp
